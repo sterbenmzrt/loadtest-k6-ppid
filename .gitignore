@@ -2,4 +2,5 @@
 .env
 
 # Reports
-reports/*
+reports/html/*.html
+reports/json/*.json
