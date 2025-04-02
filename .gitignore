@@ -4,3 +4,6 @@
 # Reports
 reports/html/*.html
 reports/json/*.json
+
+# Node Modules
+node_modules
