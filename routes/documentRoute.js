@@ -40,3 +40,36 @@ export const DocumentRoutes = [
     bodyHtml: "Putusan Pengadilan",
   },
 ];
+
+export const Documents = [
+  {
+    url: "https://jdih-bnpt.okedev.com/download/7AWJ53BV0",
+  },
+  {
+    url: "https://jdih-bnpt.okedev.com/download/JeB8ePWd2",
+  },
+  {
+    url: "https://jdih-bnpt.okedev.com/download/0yOxKMWwr",
+  },
+  {
+    url: "https://jdih-bnpt.okedev.com/download/RxWqMzWQr",
+  },
+  {
+    url: "https://jdih-bnpt.okedev.com/download/zYWzP2mvE",
+  },
+  {
+    url: "https://jdih-bnpt.okedev.com/download/4oBGAjO9D",
+  },
+  {
+    url: "https://jdih-bnpt.okedev.com/download/ZNmZ4jW4a",
+  },
+  {
+    url: "https://jdih-bnpt.okedev.com/download/ZvBNqJmxn",
+  },
+  {
+    url: "https://jdih-bnpt.okedev.com/download/6XODZvBxZ",
+  },
+  {
+    url: "https://jdih-bnpt.okedev.com/download/wLm2VYmJ6",
+  },
+];
