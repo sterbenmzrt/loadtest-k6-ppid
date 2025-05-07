@@ -1,6 +1,6 @@
 import http from "k6/http";
 import { check, group } from "k6";
-import { DocumentRoutes, Documents } from "../routes/documentRoute.js";
+import { DocumentRoutes, GetRandomDocumentName } from "../routes/documentRoute.js";
 
 export function DocumentScenarioInit() {
   AccessLawDocuments();
@@ -20,19 +20,21 @@ export function AccessLawDocuments() {
 }
 
 export function DownloadLawDocuments() {
-  Documents.forEach((document) => {
-    group(`Download ${document.url}`, () => {
-      // Simulate a delay to mimic real user behavior
-      // sleep(Math.random() * 2); // Random sleep between 0 and 2 seconds
+  group("Download Random Law Document", () => {
+    // Generate a random document name
+    const randomDocumentName = GetRandomDocumentName();
 
-      // Perform the download request
-      // let res = http.get(`${document.url}`, { responseType: "blob" });
-      let res = http.get(`${document.url}`, { responseType: "binary" });
-      check(res, {
-        "status is 200": (r) => r.status === 200,
-        "Content-Type is PDF": (r) =>
-          r.headers["Content-Type"] === "application/pdf",
-      });
+    // Construct the URL
+    const url = `https://jdih-bnpt.okedev.com/download/${randomDocumentName}`;
+
+    // Perform the download request
+    const res = http.get(url, { responseType: "binary" });
+
+    // Validate the response
+    check(res, {
+      "status is 200": (r) => r.status === 200,
+      "Content-Type is PDF": (r) =>
+        r.headers["Content-Type"] === "application/pdf",
     });
   });
 }
