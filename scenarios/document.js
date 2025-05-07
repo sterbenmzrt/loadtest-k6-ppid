@@ -25,7 +25,7 @@ export function DownloadLawDocuments() {
     const randomDocumentName = GetRandomDocumentName();
 
     // Construct the URL
-    const url = `https://jdih-bnpt.okedev.com/download/${randomDocumentName}`;
+    const url = `${__ENV.HOST_URL}/download/${randomDocumentName}`;
 
     // Perform the download request
     const res = http.get(url, { responseType: "binary" });
