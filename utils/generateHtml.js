@@ -1,65 +1,58 @@
 export function generateSummaryReport(data, timestamp, filename, stages) {
   const totalRequests = data.metrics.http_reqs.values.count;
-  const failedRequests = data.metrics.http_req_failed.values.fails;
+  const failedRequests = data.metrics.http_req_failed.values.passes;
   const passedChecks = data.metrics.checks.values.passes;
   const failedChecks = data.metrics.checks.values.fails;
   const avgResponseTime = data.metrics.http_req_duration.values.avg.toFixed(2);
   const maxResponseTime = data.metrics.http_req_duration.values.max.toFixed(2);
   const minResponseTime = data.metrics.http_req_duration.values.min.toFixed(2);
 
-  // Compute total test duration and generate timestamps
   let timeStamps = [];
   let vuCounts = [];
-
   let elapsedTime = 0;
   let prevTarget = 0;
 
   stages.forEach((stage) => {
-    let duration = parseInt(stage.duration.replace("s", ""), 10); // Ensure it's in seconds
+    let duration = parseInt(stage.duration.replace("s", ""), 10);
     let targetVUs = stage.target;
 
     for (let i = 0; i < duration; i++) {
       let interpolatedVU =
         prevTarget + ((targetVUs - prevTarget) * i) / duration;
       timeStamps.push(elapsedTime + i);
-      vuCounts.push(Math.round(interpolatedVU)); // Smoothly interpolate
+      vuCounts.push(Math.round(interpolatedVU));
     }
 
     elapsedTime += duration;
     prevTarget = targetVUs;
   });
 
-  // Use real K6 response time data instead of randomizing
-  const latencies = timeStamps.map(
-    () => data.metrics.http_req_duration.values.avg
-  );
-
-  // Generate HTML Report
   const html = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>K6 Test Summary</title>
       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; }
         h1 { color: #2c3e50; }
         .chart-container { width: 100%; max-width: 800px; margin: 20px auto; }
-        #searchInput { margin-bottom: 10px; padding: 5px; width: 100%; max-width: 300px; }
+        #searchInput, #rowsPerPageSelect { margin-bottom: 10px; padding: 5px; }
+        #searchInput { width: 100%; max-width: 300px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; cursor: pointer; }
         th { background-color: #3498db; color: white; }
         tr:nth-child(even) { background-color: #f2f2f2; }
-        .failed-row { background-color: #ffcccc !important; } /* Highlight failed rows */
+        .failed-row { background-color: #ffcccc !important; }
         #pagination { margin-top: 10px; }
       </style>
     </head>
     <body>
       <h1>K6 Performance Test Summary</h1>
       <p><strong>Generated on:</strong> ${timestamp}</p>
-      
+
       <h2>Overall Results</h2>
       <table>
         <tr><th>Metric</th><th>Value</th></tr>
@@ -71,8 +64,18 @@ export function generateSummaryReport(data, timestamp, filename, stages) {
         <tr><td>Max Response Time (ms)</td><td>${maxResponseTime}</td></tr>
         <tr><td>Min Response Time (ms)</td><td>${minResponseTime}</td></tr>
       </table>
+
       <h2>Endpoint Checks</h2>
       <input type="text" id="searchInput" placeholder="Search endpoint..." onkeyup="filterTable()">
+      <label for="rowsPerPageSelect">Rows per page:</label>
+      <select id="rowsPerPageSelect" onchange="changeRowsPerPage()">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+
       <table id="checksTable">
         <thead>
           <tr>
@@ -101,6 +104,7 @@ export function generateSummaryReport(data, timestamp, filename, stages) {
             .join("")}
         </tbody>
       </table>
+
       <div id="pagination">
         <button onclick="prevPage()">Prev</button>
         <span id="pageNumber">Page 1</span>
@@ -113,57 +117,64 @@ export function generateSummaryReport(data, timestamp, filename, stages) {
       </div>
 
       <script>
-          let currentPage = 1;
-          const rowsPerPage = 10;
-          const table = document.getElementById("checksTable");
-          const tbody = table.getElementsByTagName("tbody")[0];
-          const rows = Array.from(tbody.getElementsByTagName("tr"));
+        let currentPage = 1;
+        let rowsPerPage = parseInt(document.getElementById("rowsPerPageSelect")?.value || 10, 10);
+        const table = document.getElementById("checksTable");
+        const tbody = table.getElementsByTagName("tbody")[0];
+        const rows = Array.from(tbody.getElementsByTagName("tr"));
 
-          function showPage(page) {
-            const start = (page - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            rows.forEach((row, index) => {
-              row.style.display = index >= start && index < end ? "" : "none";
-            });
-            document.getElementById("pageNumber").innerText = "Page " + page;
+        function showPage(page) {
+          const start = (page - 1) * rowsPerPage;
+          const end = start + rowsPerPage;
+          rows.forEach((row, index) => {
+            row.style.display = index >= start && index < end ? "" : "none";
+          });
+          document.getElementById("pageNumber").innerText = "Page " + page;
+        }
+
+        function nextPage() {
+          if (currentPage * rowsPerPage < rows.length) {
+            currentPage++;
+            showPage(currentPage);
           }
+        }
 
-          function nextPage() {
-            if (currentPage * rowsPerPage < rows.length) {
-              currentPage++;
-              showPage(currentPage);
-            }
+        function prevPage() {
+          if (currentPage > 1) {
+            currentPage--;
+            showPage(currentPage);
           }
+        }
 
-          function prevPage() {
-            if (currentPage > 1) {
-              currentPage--;
-              showPage(currentPage);
-            }
-          }
+        function changeRowsPerPage() {
+          rowsPerPage = parseInt(document.getElementById("rowsPerPageSelect").value, 10);
+          currentPage = 1;
+          showPage(currentPage);
+        }
 
-          function sortTable(columnIndex) {
-            const sortedRows = [...rows].sort((a, b) => {
-              let valA = a.cells[columnIndex].innerText.toLowerCase();
-              let valB = b.cells[columnIndex].innerText.toLowerCase();
-              return isNaN(valA) || isNaN(valB)
-                ? valA.localeCompare(valB)
-                : parseFloat(valA) - parseFloat(valB);
-            });
-            tbody.innerHTML = "";
-            sortedRows.forEach((row) => tbody.appendChild(row));
-            showPage(1);
-          }
-
-          function filterTable() {
-            const filter = document.getElementById("searchInput").value.toLowerCase();
-            rows.forEach((row) => {
-              const endpoint = row.cells[0].innerText.toLowerCase();
-              row.style.display = endpoint.includes(filter) ? "" : "none";
-            });
-          }
-
+        function sortTable(columnIndex) {
+          const sortedRows = [...rows].sort((a, b) => {
+            let valA = a.cells[columnIndex].innerText.toLowerCase();
+            let valB = b.cells[columnIndex].innerText.toLowerCase();
+            return isNaN(valA) || isNaN(valB)
+              ? valA.localeCompare(valB)
+              : parseFloat(valA) - parseFloat(valB);
+          });
+          tbody.innerHTML = "";
+          sortedRows.forEach((row) => tbody.appendChild(row));
           showPage(1);
+        }
+
+        function filterTable() {
+          const filter = document.getElementById("searchInput").value.toLowerCase();
+          rows.forEach((row) => {
+            const endpoint = row.cells[0].innerText.toLowerCase();
+            row.style.display = endpoint.includes(filter) ? "" : "none";
+          });
+        }
+
+        showPage(1);
+
         const timestamps = ${JSON.stringify(timeStamps)};
         const vuCounts = ${JSON.stringify(vuCounts)};
 

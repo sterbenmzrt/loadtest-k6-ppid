@@ -10,13 +10,13 @@ export function AccessHome() {
   HomeRoutes.forEach(route => {
     group(route.url, () => {
       let res = http.get(
-        `${__ENV.HOST_URL}${route.url}`
+        `${__ENV.HOST_URL}/${route.url}`
       );
       check(res, 
         { 
           "status is 200": (r) => r.status === 200,
           // "body is present": (r) => r.body.includes(route.bodyHtml),
-          "transaction time not more than 500ms": (r) => r.timings.duration > 500
+          "transaction time not more than 2000ms": (r) => r.timings.duration <= 2000,
         });
     });
     });

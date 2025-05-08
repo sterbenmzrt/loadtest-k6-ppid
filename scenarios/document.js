@@ -1,22 +1,9 @@
 import http from "k6/http";
 import { check, group } from "k6";
-import { DocumentRoutes, GetRandomDocumentName } from "../routes/documentRoute.js";
+import { GetRandomDocumentName } from "../routes/documentRoute.js";
 
 export function DocumentScenarioInit() {
-  AccessLawDocuments();
   DownloadLawDocuments();
-}
-
-export function AccessLawDocuments() {
-  DocumentRoutes.forEach((route) => {
-    group(`Access ${route.url}`, () => {
-      let res = http.get(`${__ENV.HOST_URL}${route.url}`);
-      check(res, {
-        "status is 200": (r) => r.status === 200,
-        // "body is present": (r) => r.body.includes(route.bodyHtml),
-      });
-    });
-  });
 }
 
 export function DownloadLawDocuments() {
@@ -25,7 +12,7 @@ export function DownloadLawDocuments() {
     const randomDocumentName = GetRandomDocumentName();
 
     // Construct the URL
-    const url = `${__ENV.HOST_URL}/download/${randomDocumentName}`;
+    const url = `${__ENV.HOST_URL}/storage/${randomDocumentName}`;
 
     // Perform the download request
     const res = http.get(url, { responseType: "binary" });

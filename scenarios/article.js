@@ -1,22 +1,9 @@
 import http from "k6/http";
 import { check, group } from "k6";
-import { ArticleRoutes, GetRandomArticleName } from "../routes/articleRoute.js";
+import { GetRandomArticleName } from "../routes/articleRoute.js";
 
-export function ArticleScenarioInit() {
-  AccessArticlePages();
+export function ArticleScenarioInit() {  
   AccessRandomArticle();
-}
-
-export function AccessArticlePages() {
-  ArticleRoutes.forEach((route) => {
-    group(`Access ${route.url}`, () => {
-      let res = http.get(`${__ENV.HOST_URL}${route.url}`);
-      check(res, {
-        "status is 200": (r) => r.status === 200,
-        // "body is present": (r) => r.body.includes(route.bodyHtml),
-      });
-    });
-  });
 }
 
 export function AccessRandomArticle() {

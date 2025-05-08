@@ -1,11 +1,11 @@
 export const ArticleRoutes = [
   {
-    url: "/en/news",
+    url: "en/artikel",
     method: "GET",
     bodyHtml: "Peraturan Perundang-undangan",
     },
   {
-    url: "/id/berita",
+    url: "id/artikel",
     method: "GET",
     bodyHtml: "Peraturan Perundang-undangan",
   },
