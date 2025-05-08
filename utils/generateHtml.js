@@ -1,4 +1,12 @@
-export function generateSummaryReport(data, timestamp, filename, stages) {
+export function generateSummaryReport(
+  data,
+  timestamp,
+  filename,
+  stages,
+  maxDuration
+) {
+  const vus = data.metrics.vus_max.values.value;
+  const duration = maxDuration;
   const totalRequests = data.metrics.http_reqs.values.count;
   const failedRequests = data.metrics.http_req_failed.values.passes;
   const passedChecks = data.metrics.checks.values.passes;
@@ -57,6 +65,8 @@ export function generateSummaryReport(data, timestamp, filename, stages) {
       <table>
         <tr><th>Metric</th><th>Value</th></tr>
         <tr><td>Total Requests</td><td>${totalRequests}</td></tr>
+        <tr><td>Max VUs</td><td>${vus}</td></tr>
+        <tr><td>Duration (s)</td><td>${duration}</td></tr>
         <tr><td>Failed Requests</td><td>${failedRequests}</td></tr>
         <tr><td>Passed Checks</td><td>${passedChecks}</td></tr>
         <tr><td>Failed Checks</td><td>${failedChecks}</td></tr>
